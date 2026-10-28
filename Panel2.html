@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Link.App - Panel de Control</title>
+<meta name="theme-color" content="#15803D">
+<style>
+/* =========================================================
+   TOKENS Y BASE
+   ========================================================= */
+:root{
+  --ink:#0F1F17; --muted:#4B5F54; --line:#D3E0D7; --bg:#F3F7F4; --card:#fff;
+  --green:#15803D; --green-d:#0F6B35; --mint:#DDEFD9; --err:#B42318; --warn:#92400E;
+  --r:16px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font)}
+h1,h2,h3,p,ul{margin:0}
+ul{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #0B5FFF;outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:fixed;left:12px;top:-60px;z-index:100;padding:10px 16px;border-radius:10px;background:var(--ink);color:#fff;text-decoration:none}
+.skip:focus{top:12px}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:12px;max-width:1200px;margin:0 auto;padding:10px 16px;min-height:64px}
+.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--green);color:#fff;flex:none}
+.top h1{font-size:clamp(16px,2.6vw,20px);font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.top h1 span{color:var(--muted);font-weight:500}
+.grow{flex:1}
+.saved{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.saved .i{width:16px;height:16px;color:var(--green)}
+.top h1{white-space:nowrap}
+@media(max-width:639.98px){.saved #savedTxt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
+@media(max-width:439.98px){.top-in{gap:8px;padding-inline:12px}.top h1{font-size:15px}#viewBtn{padding:0;width:44px}#viewBtn .bt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
+
+/* =========================================================
+   BOTONES Y CAMPOS
+   ========================================================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--green);background:var(--green);color:#fff;font-weight:600;font-size:15px;text-decoration:none;cursor:pointer;transition:background-color .15s,transform .15s}
+.btn:hover{background:var(--green-d)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:#fff;color:var(--green-d)}
+.btn.ghost:hover{background:var(--mint)}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--muted);padding:0 12px}
+.btn.quiet:hover{background:#E8EFEA;color:var(--ink)}
+.btn.block{width:100%}
+.ibtn{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+.ibtn:hover:not(:disabled){background:var(--mint)}
+.ibtn:disabled{opacity:.35;cursor:not-allowed}
+.ibtn.del{color:var(--err)}
+.ibtn.del:hover:not(:disabled){background:#FDECEA}
+.stack{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0;border:0;padding:0;margin:0}
+.lbl,.field>label{font-weight:600;font-size:14px}
+.opt-t{font-weight:400;color:var(--muted)}
+.inp{width:100%;min-height:46px;padding:0 14px;border:1.5px solid #8DA396;border-radius:12px;background:#fff;font-size:16px}
+.inp:hover{border-color:#5E7A6B}
+.inp:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(21,128,61,.2)}
+.inp[aria-invalid="true"]{border-color:var(--err)}
+textarea.inp{padding:10px 14px;min-height:76px;resize:vertical}
+.err{font-size:13px;color:var(--err);font-weight:500}
+.err:empty{display:none}
+.hint{font-size:13px;color:var(--muted)}
+.row{display:grid;gap:14px}
+@media(min-width:560px){.row.two{grid-template-columns:1fr 1fr}}
+input[type="color"]{width:100%;height:46px;padding:3px;border:1.5px solid #8DA396;border-radius:12px;background:#fff;cursor:pointer}
+input[type="range"]{width:100%;min-height:36px;accent-color:var(--green)}
+.rng{display:flex;align-items:center;gap:12px}
+.rng output{min-width:46px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+input[type="file"]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.file-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.file-row input:focus-visible+label{outline:3px solid #0B5FFF;outline-offset:2px}
+.fname{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.seg span{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1.5px solid #8DA396;border-radius:999px;background:#fff;font-weight:600;font-size:14px}
+.seg input:checked+span{background:var(--mint);border-color:var(--green);color:var(--green-d)}
+.seg input:focus-visible+span{outline:3px solid #0B5FFF;outline-offset:2px}
+.sub{padding:14px;border:1px solid var(--line);border-radius:14px;background:#F8FBF9}
+.notice{padding:10px 14px;border-radius:12px;background:#FFF4E0;color:var(--warn);font-size:13.5px}
+
+/* =========================================================
+   LAYOUT DOS COLUMNAS
+   ========================================================= */
+.app{max-width:1200px;margin:0 auto;padding:18px 16px 90px}
+.controls{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 1px 2px rgba(15,31,23,.04)}
+.card h2{font-size:18px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.card h2 .i{color:var(--green)}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:999px;background:#E3ECE6;margin-bottom:16px}
+.views button{min-height:44px;border:0;border-radius:999px;background:transparent;font-weight:600;color:var(--muted);cursor:pointer}
+.views button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+@media(max-width:899.98px){
+  .app[data-view="edit"] .preview{display:none}
+  .app[data-view="preview"] .controls{display:none}
+}
+@media(min-width:900px){
+  .views{display:none}
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start;padding-top:24px}
+  .preview{position:sticky;top:88px}
+}
+.preview h2{font-size:16px;font-weight:700;margin-bottom:12px;color:var(--muted);text-align:center}
+
+/* ---------- catálogo (lista) ---------- */
+.items{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 12px 12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.item.flash{animation:flash 1.2s}
+.item b{display:block;overflow-wrap:anywhere}
+.item small{display:block;color:var(--muted);overflow-wrap:anywhere}
+.item .url{font-size:13px;color:var(--green-d)}
+.pb{display:flex;gap:6px}
+.empty{margin-top:16px;padding:20px;border:2px dashed var(--line);border-radius:14px;text-align:center;color:var(--muted)}
+@keyframes flash{from{background:var(--mint)}}
+
+/* =========================================================
+   TELÉFONO
+   ========================================================= */
+.phone{position:relative;width:100%;max-width:380px;margin:0 auto;height:min(760px,calc(100svh - 150px));min-height:520px;border:10px solid #111;border-radius:44px;background:#111;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.phone::before{content:"";position:absolute;top:6px;left:50%;z-index:6;width:84px;height:22px;margin-left:-42px;border-radius:99px;background:#111}
+.screen{position:relative;height:100%;overflow:hidden;border-radius:34px;background:#fff}
+@media(max-width:899.98px){.phone{height:calc(100svh - 190px);border-width:8px;border-radius:36px}.screen{border-radius:28px}}
+
+/* =========================================================
+   MICRO-SITIO (vista previa y página pública)
+   ========================================================= */
+.lp{position:absolute;inset:0;overflow:hidden;color:#10201A;font-family:var(--font)}
+.lp-scroll{position:absolute;inset:0;z-index:1;overflow-y:auto;overscroll-behavior:contain}
+.lp-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background-size:cover;background-position:center}
+.lp-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lp-shade{position:absolute;inset:0;background:rgba(0,0,0,.28)}
+.lp-view{position:relative;display:flex;flex-direction:column;align-items:center;min-height:100%;padding-bottom:28px}
+.lp-banner{position:relative;width:100%;height:150px;overflow:hidden;background:#000;flex:none}
+.lp-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lp-banner i{position:absolute;inset:0}
+.lp-logo{position:relative;display:grid;place-items:center;width:104px;height:104px;border-radius:50%;overflow:hidden;border:4px solid #fff;background:#DDEFD9;color:#0F6B35;font-weight:700;font-size:40px;box-shadow:0 10px 24px -10px rgba(0,0,0,.55);flex:none}
+.lp-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.lp-view.has-banner .lp-logo{margin-top:-52px}
+.lp-view.no-banner .lp-logo{margin-top:30px}
+.lp-title{margin-top:14px;max-width:calc(100% - 32px);padding:8px 20px;border-radius:999px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:22px;font-weight:700;line-height:1.25;text-align:center;overflow-wrap:anywhere}
+.lp-list{display:flex;flex-direction:column;gap:12px;width:100%;max-width:480px;margin-top:20px;padding:0 16px}
+.lp-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px;padding:12px 18px;border-radius:18px;background:rgba(255,255,255,.92);color:#10201A;text-align:center;text-decoration:none;box-shadow:0 10px 24px -14px rgba(0,0,0,.6);transition:transform .15s,box-shadow .15s}
+.lp-link:hover{transform:translateY(-2px)}
+.lp-link:focus-visible{outline:3px solid #0B5FFF;outline-offset:2px}
+.lp-link b{font-size:16px;overflow-wrap:anywhere}
+.lp-link span{font-size:13.5px;color:#3B4F45;overflow-wrap:anywhere}
+.lp-empty{padding:16px;border-radius:16px;background:rgba(255,255,255,.85);text-align:center;color:#3B4F45;font-size:14px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- página pública ---------- */
+.lp-soc{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px;padding:0 16px}
+.lp-soc a{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);color:#10201A;box-shadow:0 8px 18px -10px rgba(0,0,0,.6);transition:transform .15s}
+.lp-soc a:hover{transform:translateY(-2px)}
+.lp-soc a:focus-visible{outline:3px solid #0B5FFF;outline-offset:2px}
+.lp-h{align-self:flex-start;margin:0 0 2px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.9);font-size:16px;font-weight:700}
+.lp-prods{display:flex;flex-direction:column;gap:12px;width:100%;max-width:480px;margin-top:22px;padding:0 16px}
+.lp-prod{display:grid;grid-template-columns:84px minmax(0,1fr);gap:12px;align-items:center;padding:10px;border-radius:18px;background:rgba(255,255,255,.92);color:#10201A;text-decoration:none;box-shadow:0 10px 24px -14px rgba(0,0,0,.6)}
+a.lp-prod{transition:transform .15s}
+a.lp-prod:hover{transform:translateY(-2px)}
+a.lp-prod:focus-visible{outline:3px solid #0B5FFF;outline-offset:2px}
+.lp-ph{display:grid;place-items:center;width:84px;height:84px;border-radius:14px;overflow:hidden;background:#DDEFD9;color:#0F6B35;font-weight:700;font-size:30px}
+.lp-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.lp-pi{min-width:0}
+.lp-pi b{display:block;font-size:16px;overflow-wrap:anywhere}
+.lp-pi .pr{display:block;font-weight:700;color:#0F6B35;font-size:16px}
+.lp-pi span.d{display:block;font-size:13.5px;color:#3B4F45;overflow-wrap:anywhere}
+.lp-mini{position:sticky;top:0;z-index:5;height:0}
+.lp-mini-in{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:8px 14px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 20px -12px rgba(0,0,0,.6);transform:translateY(-110%);opacity:0;transition:transform .25s,opacity .25s;pointer-events:none}
+.lp.scrolled .lp-mini-in{transform:none;opacity:1}
+.lp-mini-in .m{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;overflow:hidden;background:#DDEFD9;color:#0F6B35;font-weight:700;flex:none}
+.lp-mini-in .m img{width:100%;height:100%;object-fit:cover;display:block}
+.lp-mini-in span.t{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-vt{position:absolute;right:12px;bottom:12px;z-index:6;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#10201A;cursor:pointer;font-weight:700}
+.item.p{grid-template-columns:48px minmax(0,1fr) auto}
+.thumb{display:grid;place-items:center;width:48px;height:48px;border-radius:12px;overflow:hidden;background:var(--mint);color:var(--green-d);font-weight:700}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.pubwrap{position:fixed;inset:0;background:#000}
+.pubwrap .lp{position:absolute;inset:0}
+.pub-back{position:fixed;left:12px;top:12px;z-index:50;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.95);color:var(--ink);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 6px 18px -8px rgba(0,0,0,.6)}
+
+/* ---------- tema oscuro de la página ---------- */
+.lp[data-theme="dark"]{color:#EAF4EC}
+.lp[data-theme="dark"] :is(.lp-title,.lp-h,.lp-link,.lp-prod,.lp-soc a,.lp-mini-in,.lp-empty,.lp-vt){background:rgba(13,25,19,.9);color:#EAF4EC}
+.lp[data-theme="dark"] :is(.lp-link span,.lp-pi span.d,.lp-empty){color:#B6CABD}
+.lp[data-theme="dark"] .lp-pi .pr{color:#86EFAC}
+.lp[data-theme="dark"] :is(.lp-logo,.lp-ph,.lp-mini-in .m){background:#1F3A2B;color:#86EFAC}
+.lp[data-theme="dark"] .lp-logo{border-color:#0D1913}
+
+/* ---------- tema oscuro del panel ---------- */
+html[data-ui="dark"]{color-scheme:dark;--ink:#EAF4EC;--muted:#A9C0B1;--line:#2E4237;--bg:#0B1510;--card:#111E17;--mint:#1E3A2B;--err:#FF9B8F;--warn:#F5C77E}
+html[data-ui="dark"] .top{background:rgba(17,30,23,.92)}
+html[data-ui="dark"] .btn:hover{background:#18934A}
+html[data-ui="dark"] .btn.ghost{background:var(--card);color:#9BE7B3}
+html[data-ui="dark"] .btn.ghost:hover{background:var(--mint)}
+html[data-ui="dark"] .btn.quiet:hover{background:#1A2B21;color:var(--ink)}
+html[data-ui="dark"] :is(.ibtn,.inp,.seg span,.item,input[type="color"]){background:#16251C}
+html[data-ui="dark"] .ibtn.del:hover:not(:disabled){background:#3A1D1A}
+html[data-ui="dark"] .seg input:checked+span{background:var(--mint);color:#9BE7B3;border-color:#4ADE80}
+html[data-ui="dark"] .sub{background:#0F1B14}
+html[data-ui="dark"] .views{background:#16251C}
+html[data-ui="dark"] .views button[aria-pressed="true"]{background:#24392D;color:var(--ink)}
+html[data-ui="dark"] .notice{background:#3A2C12}
+html[data-ui="dark"] :is(.item .url,.thumb,.card h2 .i,.soc-l .i){color:#9BE7B3}
+html[data-ui="dark"] .toast{background:#1B2D23;border:1px solid var(--line)}
+html[data-ui="dark"] .toast.error{background:#8F1D12}
+html[data-ui="dark"] .skip{background:#EAF4EC;color:#0F1F17}
+html[data-ui="dark"] :focus-visible{outline-color:#7DB2FF}
+html[data-ui="dark"] .inp::placeholder{color:#7F988A}
+
+/* ---------- logo a la izquierda ---------- */
+.lp-head{display:flex;flex-direction:column;align-items:center;width:100%}
+.lp-view.logo-left .lp-head{flex-direction:row;align-items:flex-end;justify-content:flex-start;gap:12px;padding:0 16px}
+.lp-view.logo-left .lp-title{margin:0 0 6px;text-align:left;min-width:0;max-width:none;border-radius:18px}
+.lp-view.logo-left .lp-soc{justify-content:flex-start;align-self:stretch}
+.lp-vt:focus-visible{outline:3px solid #0B5FFF;outline-offset:2px}
+
+/* ---------- avisos ---------- */
+.toasts{position:fixed;left:0;right:0;bottom:16px;z-index:90;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 12px;pointer-events:none}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:12px;max-width:480px;padding:10px 14px;border-radius:14px;background:var(--ink);color:#fff;font-size:14.5px;box-shadow:0 14px 30px -12px rgba(0,0,0,.6)}
+.toast.error{background:var(--err)}
+.toast button{min-height:36px;padding:0 12px;border-radius:99px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6v.01M4 12v.01M4 18v.01"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M18 14.8c1.8.6 3 2.2 3 5.2"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="3"/><path d="M17 10.5l4-2.5v8l-4-2.5"/></symbol>
+  <symbol id="i-at" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 13h18"/></symbol>
+  <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="2"/><rect x="17" y="14" width="4" height="7" rx="2"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.7-5.2A8.5 8.5 0 1 1 21 11.5z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.7 7-11a7 7 0 0 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+</svg>
+
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<!-- ============ PÁGINA 1: PANEL DE CONTROL ============ -->
+<div id="panel">
+  <header class="top">
+    <div class="top-in">
+      <span class="mark" aria-hidden="true"><svg class="i"><use href="#i-link"/></svg></span>
+      <h1>Link.App <span>- Panel de Control</span></h1>
+      <span class="grow"></span>
+      <span class="saved" id="saved" role="status"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span id="savedTxt">Guardado</span></span>
+      <a class="btn ghost" href="#ver" id="viewBtn" aria-label="Ver página"><svg class="i" aria-hidden="true"><use href="#i-external"/></svg><span class="bt">Ver página</span></a>
+    </div>
+  </header>
+
+  <main class="app" id="main" data-view="edit" tabindex="-1">
+    <div class="views" role="group" aria-label="Qué querés ver">
+      <button type="button" id="vEdit" aria-pressed="true">Panel</button>
+      <button type="button" id="vPrev" aria-pressed="false">Vista previa</button>
+    </div>
+
+    <div class="controls">
+      <p class="notice" id="storeWarn" role="alert" hidden>Este navegador no permite guardar los cambios en esta vista (pasa en vistas previas o ventanas aisladas). Abrí el archivo directamente en Chrome, Edge o Firefox para que todo se conserve al recargar.</p>
+      <!-- ===== 1. GENERAL ===== -->
+      <section class="card" aria-labelledby="h-gen">
+        <h2 id="h-gen"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg>Configuración general</h2>
+        <div class="stack">
+          <div class="field">
+            <label for="title">Título del micro-sitio</label>
+            <input class="inp" id="title" maxlength="50" autocomplete="off" placeholder="Ej: Mi Perfil">
+          </div>
+
+          <fieldset class="field">
+            <legend class="lbl" style="margin-bottom:8px">Tema de tu página</legend>
+            <div class="seg">
+              <label><input type="radio" name="theme" value="light"><span>Claro</span></label>
+              <label><input type="radio" name="theme" value="dark"><span>Oscuro</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="field">
+            <legend class="lbl" style="margin-bottom:8px">Tema de este panel</legend>
+            <div class="seg">
+              <label><input type="radio" name="uiTheme" value="light"><span>Claro</span></label>
+              <label><input type="radio" name="uiTheme" value="dark"><span>Oscuro</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <span class="lbl" id="logoLbl">Logo (foto de perfil)</span>
+            <div class="file-row">
+              <input type="file" id="logoFile" accept="image/*" aria-labelledby="logoLbl">
+              <label class="btn ghost" for="logoFile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Elegir imagen</label>
+              <button type="button" class="btn quiet" id="logoClear" hidden>Quitar</button>
+            </div>
+            <p class="hint">Se muestra en círculo. Al bajar la página, el logo queda fijo arriba a la izquierda en una barra chica.</p>
+          </div>
+          <fieldset class="field">
+            <legend class="lbl" style="margin-bottom:8px">Posición del logo</legend>
+            <div class="seg">
+              <label><input type="radio" name="logoPos" value="center"><span>Centrado</span></label>
+              <label><input type="radio" name="logoPos" value="left"><span>A la izquierda</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field">
+            <legend class="lbl" style="margin-bottom:8px">Fondo del micro-sitio</legend>
+            <div class="seg">
+              <label><input type="radio" name="bgType" value="color"><span>Color sólido</span></label>
+              <label><input type="radio" name="bgType" value="gradient"><span>Degradado</span></label>
+              <label><input type="radio" name="bgType" value="image"><span>Imagen</span></label>
+              <label><input type="radio" name="bgType" value="video"><span>Video</span></label>
+            </div>
+          </fieldset>
+
+          <div class="sub" id="boxColor">
+            <div class="field"><label for="color">Color de fondo</label><input type="color" id="color"></div>
+          </div>
+          <div class="sub stack" id="boxGrad">
+            <div class="row two">
+              <div class="field"><label for="g1">Color inicial</label><input type="color" id="g1"></div>
+              <div class="field"><label for="g2">Color final</label><input type="color" id="g2"></div>
+            </div>
+            <div class="field"><label for="angle">Dirección: <output id="angleOut" for="angle">160°</output></label>
+              <input type="range" id="angle" min="0" max="360" step="5"></div>
+          </div>
+          <div class="sub stack" id="boxImage">
+            <div class="file-row">
+              <input type="file" id="bgImgFile" accept="image/*">
+              <label class="btn ghost" for="bgImgFile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Subir imagen de fondo</label>
+              <button type="button" class="btn quiet" id="bgImgClear" hidden>Quitar</button>
+            </div>
+            <p class="hint" id="bgImgHint">Todavía no subiste ninguna imagen.</p>
+          </div>
+          <div class="sub stack" id="boxVideo">
+            <div class="file-row">
+              <input type="file" id="bgVidFile" accept="video/mp4,video/webm,video/*">
+              <label class="btn ghost" for="bgVidFile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Subir video de fondo</label>
+              <button type="button" class="btn quiet" id="bgVidClear" hidden>Quitar</button>
+            </div>
+            <p class="hint" id="bgVidHint">Todavía no subiste ningún video. Máximo 100 MB; se reproduce sin sonido y en bucle.</p>
+          </div>
+          <div class="field" id="boxShade">
+            <label for="shade">Oscurecer el fondo para que se lea mejor: <output id="shadeOut" for="shade">28%</output></label>
+            <input type="range" id="shade" min="0" max="80" step="2">
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 2. BANNER ===== -->
+      <section class="card" aria-labelledby="h-ban">
+        <h2 id="h-ban"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Banner superior</h2>
+        <div class="stack">
+          <div class="field">
+            <span class="lbl" id="banLbl">Imagen de banner</span>
+            <div class="file-row">
+              <input type="file" id="banFile" accept="image/*" aria-labelledby="banLbl">
+              <label class="btn ghost" for="banFile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Elegir banner</label>
+              <button type="button" class="btn quiet" id="banClear" hidden>Quitar</button>
+            </div>
+            <p class="hint">Va arriba de todo, con el logo apoyado debajo. Si no cargás banner, el logo queda arriba al centro.</p>
+          </div>
+          <div class="field">
+            <label for="banOp">Opacidad de la imagen: <output id="banOpOut" for="banOp">100%</output></label>
+            <input type="range" id="banOp" min="0" max="100" step="5">
+          </div>
+          <div class="row two">
+            <div class="field"><label for="ovColor">Color de superposición</label><input type="color" id="ovColor"></div>
+            <div class="field"><label for="ovAmt">Intensidad: <output id="ovAmtOut" for="ovAmt">30%</output></label>
+              <input type="range" id="ovAmt" min="0" max="100" step="5"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== REDES SOCIALES ===== -->
+      <section class="card" aria-labelledby="h-soc">
+        <h2 id="h-soc"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Redes sociales</h2>
+        <p class="hint" style="margin:-6px 0 14px">Escribí tu usuario o pegá el link completo. Salen como íconos debajo del título. Dejá vacío lo que no uses.</p>
+        <div class="row two" id="socGrid"></div>
+      </section>
+
+      <!-- ===== 3. CATÁLOGO ===== -->
+      <section class="card" aria-labelledby="h-cat">
+        <h2 id="h-cat"><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>Catálogo de links</h2>
+        <form id="form" class="stack" novalidate>
+          <div class="field">
+            <label for="fText">Texto del botón</label>
+            <input class="inp" id="fText" maxlength="60" autocomplete="off" placeholder="Ej: Mi tienda online" aria-describedby="fTextErr">
+            <p class="err" id="fTextErr"></p>
+          </div>
+          <div class="field">
+            <label for="fUrl">URL de destino</label>
+            <input class="inp" id="fUrl" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://mitienda.com" aria-describedby="fUrlErr">
+            <p class="err" id="fUrlErr"></p>
+          </div>
+          <div class="field">
+            <label for="fDesc">Descripción <span class="opt-t">(opcional)</span></label>
+            <input class="inp" id="fDesc" maxlength="100" autocomplete="off" placeholder="Ej: Mirá todos los productos">
+          </div>
+          <button type="submit" class="btn block"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Añadir elemento</button>
+        </form>
+        <ul class="items" id="items" aria-label="Elementos del catálogo"></ul>
+        <p class="empty" id="itemsEmpty">Todavía no agregaste elementos. Completá el formulario y tocá “Añadir elemento”.</p>
+      </section>
+
+      <!-- ===== PRODUCTOS ===== -->
+      <section class="card" aria-labelledby="h-prod">
+        <h2 id="h-prod"><svg class="i" aria-hidden="true"><use href="#i-bag"/></svg>Productos</h2>
+        <form id="pform" class="stack" novalidate>
+          <div class="field">
+            <label for="pName">Nombre del producto</label>
+            <input class="inp" id="pName" maxlength="60" autocomplete="off" placeholder="Ej: Torta de chocolate" aria-describedby="pNameErr">
+            <p class="err" id="pNameErr"></p>
+          </div>
+          <div class="row two">
+            <div class="field">
+              <label for="pPrice">Precio <span class="opt-t">(opcional)</span></label>
+              <input class="inp" id="pPrice" inputmode="decimal" autocomplete="off" placeholder="12000" aria-describedby="pPriceErr">
+              <p class="err" id="pPriceErr"></p>
+            </div>
+            <div class="field">
+              <label for="cur">Moneda</label>
+              <select class="inp" id="cur"><option value="$">Pesos ($)</option><option value="US$">Dólares (US$)</option><option value="€">Euros (€)</option><option value="R$">Reales (R$)</option><option value="S/">Soles (S/)</option></select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pDesc">Descripción <span class="opt-t">(opcional)</span></label>
+            <input class="inp" id="pDesc" maxlength="90" autocomplete="off" placeholder="Ej: Rinde 8 porciones">
+          </div>
+          <div class="field">
+            <label for="pUrl">Link para comprar o pedir <span class="opt-t">(opcional)</span></label>
+            <input class="inp" id="pUrl" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://..." aria-describedby="pUrlErr">
+            <p class="err" id="pUrlErr"></p>
+          </div>
+          <div class="field">
+            <span class="lbl" id="pFotoLbl">Foto <span class="opt-t">(opcional)</span></span>
+            <div class="file-row">
+              <input type="file" id="pFile" accept="image/*" aria-labelledby="pFotoLbl">
+              <label class="btn ghost" for="pFile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Elegir foto</label>
+              <button type="button" class="btn quiet" id="pFileClear" hidden>Quitar</button>
+              <span class="fname" id="pFileHint" role="status"></span>
+            </div>
+          </div>
+          <button type="submit" class="btn block"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Añadir producto</button>
+        </form>
+        <ul class="items" id="pItems" aria-label="Productos cargados"></ul>
+        <p class="empty" id="pEmpty">Todavía no cargaste productos.</p>
+      </section>
+
+      <button type="button" class="btn quiet" id="reset" style="align-self:center">Restablecer todo</button>
+    </div>
+
+    <aside class="preview" aria-labelledby="h-prev">
+      <h2 id="h-prev">Vista previa en vivo</h2>
+      <div class="phone"><div class="screen" id="screen" role="region" aria-label="Vista previa del micro-sitio"></div></div>
+    </aside>
+  </main>
+</div>
+
+<!-- ============ PÁGINA 2: MICRO-SITIO PÚBLICO ============ -->
+<div id="pub" class="pubwrap" hidden>
+  <a class="pub-back" href="#" id="pubBack"><svg class="i" aria-hidden="true"><use href="#i-back"/></svg>Volver al panel</a>
+  <div id="pubScreen" style="position:absolute;inset:0"></div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* =========================================================
+   CONSTANTES Y ESTADO
+   ========================================================= */
+const KEY = 'linkapp.panel.v1';
+const MAX_VIDEO = 100 * 1024 * 1024;
+const MAX_LINKS = 50;
+const $ = id => document.getElementById(id);
+const hexOk = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+const clamp = (v, a, b, d) => { v = Number(v); return isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const DEFAULTS = {
+  title: 'Mi Perfil',
+  bgType: 'gradient', color: '#0F2A1D', g1: '#15803D', g2: '#0E7490', angle: 160,
+  bgImg: '', hasVideo: false, shade: 28,
+  logo: '', banner: '', banOp: 100, ovColor: '#000000', ovAmt: 30,
+  theme: 'light', logoPos: 'center', links: [], cur: '$', social: {}, products: []
+};
+
+function imgOk(v) { return typeof v === 'string' && v.length < 1500000 && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v) ? v : ''; }
+const CURS = ['$', 'US$', '€', 'R$', 'S/'];
+const MAX_PRODUCTS = 60;
+const MAP_HOSTS = /(^|\.)(google\.[a-z.]{2,6}|goo\.gl|g\.page|waze\.com|apple\.com|openstreetmap\.org)$/i;
+const SOC = [
+  { k: 'instagram', n: 'Instagram', ic: 'camera', ph: '@tuusuario', base: 'https://instagram.com/' },
+  { k: 'tiktok', n: 'TikTok', ic: 'music', ph: '@tuusuario', base: 'https://www.tiktok.com/@' },
+  { k: 'facebook', n: 'Facebook', ic: 'users', ph: 'tu.pagina', base: 'https://facebook.com/' },
+  { k: 'youtube', n: 'YouTube', ic: 'video', ph: '@tucanal', base: 'https://www.youtube.com/@' },
+  { k: 'x', n: 'X (Twitter)', ic: 'at', ph: '@tuusuario', base: 'https://x.com/' },
+  { k: 'whatsapp', n: 'WhatsApp', ic: 'chat', ph: '11 2345 6789' },
+  { k: 'telegram', n: 'Telegram', ic: 'send', ph: '@tuusuario', base: 'https://t.me/' },
+  { k: 'linkedin', n: 'LinkedIn', ic: 'briefcase', ph: 'Link de tu perfil' },
+  { k: 'spotify', n: 'Spotify', ic: 'headphones', ph: 'Link de tu perfil o playlist' },
+  { k: 'web', n: 'Sitio web', ic: 'globe', ph: 'tusitio.com' },
+  { k: 'maps', n: 'Google Maps', ic: 'pin', ph: 'Dirección o link de Google Maps' }
+];
+function waNum(input) {
+  const raw = String(input || '').trim(); let d = raw.replace(/\D/g, '');
+  if (!d) return '';
+  if (raw[0] === '+') return d.length >= 8 && d.length <= 15 ? d : '';
+  d = d.replace(/^0+/, '');
+  if (d.startsWith('549') && d.length >= 12 && d.length <= 13) return d;
+  if (d.startsWith('54') && d.length >= 11 && d.length <= 12) return '549' + d.slice(2);
+  if (d.length === 12 && d.slice(2, 4) === '15') d = d.slice(0, 2) + d.slice(4);
+  else if (d.length === 12 && d.slice(4, 6) === '15') d = d.slice(0, 4) + d.slice(6);
+  else if (d.length === 11 && d.slice(3, 5) === '15') d = d.slice(0, 3) + d.slice(5);
+  return d.length === 10 ? '549' + d : '';
+}
+function socHref(def, v) {
+  v = String(v || '').trim().slice(0, 200);
+  if (!v) return '';
+  if (def.k === 'whatsapp') { const n = waNum(v); return n ? 'https://wa.me/' + n : ''; }
+  if (def.k === 'maps') {
+    const u = normUrl(v);
+    if (u) { try { return MAP_HOSTS.test(new URL(u).hostname) ? u : ''; } catch (e) { return ''; } }
+    return /\s|,/.test(v) ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(v) : '';
+  }
+  if (/^https?:\/\//i.test(v) || v.includes('/') || !def.base) return normUrl(v);
+  return /^@?[\w.-]{1,60}$/.test(v) ? def.base + v.replace(/^@/, '') : '';
+}
+function parsePrice(raw) {
+  let s = String(raw == null ? '' : raw).replace(/[^\d.,]/g, '');
+  if (!s) return NaN;
+  const lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
+  if (lc > -1 && ld > -1) s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  else if (lc > -1 || ld > -1) { const sep = lc > -1 ? ',' : '.', parts = s.split(sep); s = (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) ? parts.join('') : parts.join('.'); }
+  const n = parseFloat(s);
+  return isFinite(n) && n > 0 && n <= 1e9 ? Math.round(n * 100) / 100 : NaN;
+}
+const fmtPrice = (n, cur) => cur + ' ' + new Intl.NumberFormat('es-AR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }).format(n);
+function normUrl(raw) {
+  let s = String(raw || '').trim();
+  if (!s) return '';
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) {
+    if (/\s/.test(s) || !/^[^\s/]+\.[a-z]{2,}([/?#:].*)?$/i.test(s)) return '';
+    s = 'https://' + s;
+  }
+  try {
+    const u = new URL(s);
+    return (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname.includes('.') ? u.href : '';
+  } catch (e) { return ''; }
+}
+function clean(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const d = DEFAULTS, s = {};
+  s.title = typeof r.title === 'string' ? r.title.slice(0, 50) : d.title;
+  s.bgType = ['color', 'gradient', 'image', 'video'].includes(r.bgType) ? r.bgType : d.bgType;
+  s.color = hexOk(r.color) ? r.color : d.color;
+  s.g1 = hexOk(r.g1) ? r.g1 : d.g1;
+  s.g2 = hexOk(r.g2) ? r.g2 : d.g2;
+  s.angle = clamp(r.angle, 0, 360, d.angle);
+  s.bgImg = imgOk(r.bgImg);
+  s.hasVideo = !!r.hasVideo;
+  s.shade = clamp(r.shade, 0, 80, d.shade);
+  s.logo = imgOk(r.logo);
+  s.banner = imgOk(r.banner);
+  s.banOp = clamp(r.banOp, 0, 100, d.banOp);
+  s.ovColor = hexOk(r.ovColor) ? r.ovColor : d.ovColor;
+  s.ovAmt = clamp(r.ovAmt, 0, 100, d.ovAmt);
+  s.cur = CURS.includes(r.cur) ? r.cur : d.cur;
+  s.logoPos = r.logoPos === 'left' ? 'left' : 'center';
+  s.theme = r.theme === 'dark' ? 'dark' : 'light';
+  const so = r.social && typeof r.social === 'object' ? r.social : {};
+  s.social = {}; SOC.forEach(x => { s.social[x.k] = typeof so[x.k] === 'string' ? so[x.k].slice(0, 200) : ''; });
+  const seen = new Set();
+  s.products = (Array.isArray(r.products) ? r.products : []).slice(0, MAX_PRODUCTS).map(p => {
+    if (!p || typeof p !== 'object') return null;
+    const name = String(p.name || '').trim().slice(0, 60), price = Number(p.price);
+    if (!name || !isFinite(price) || price < 0 || price > 1e9) return null;
+    let id = String(p.id || '').replace(/[^a-z0-9]/gi, '').slice(0, 12) || uid();
+    while (seen.has(id)) id = uid(); seen.add(id);
+    return { id, name, price: Math.round(price * 100) / 100, desc: String(p.desc || '').trim().slice(0, 90), img: imgOk(p.img), url: normUrl(p.url) };
+  }).filter(Boolean);
+  s.links = (Array.isArray(r.links) ? r.links : []).slice(0, MAX_LINKS).map(l => {
+    if (!l || typeof l !== 'object') return null;
+    const url = normUrl(l.url), text = String(l.text || '').trim().slice(0, 60);
+    if (!url || !text) return null;
+    let id = String(l.id || '').replace(/[^a-z0-9]/gi, '').slice(0, 12) || uid();
+    while (seen.has(id)) id = uid(); seen.add(id);
+    return { id, text, url, desc: String(l.desc || '').trim().slice(0, 100) };
+  }).filter(Boolean);
+  return s;
+}
+let storeOK = true;
+try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); } catch (e) { storeOK = false; }
+let state;
+try { state = clean(JSON.parse(localStorage.getItem(KEY))); } catch (e) { state = clean(null); }
+
+/* ----- IndexedDB: el video es demasiado grande para localStorage ----- */
+const idb = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      const q = indexedDB.open('linkapp', 1);
+      q.onupgradeneeded = () => q.result.createObjectStore('media');
+      q.onsuccess = () => { this.db = q.result; res(q.result); };
+      q.onerror = () => rej(q.error);
+    });
+  },
+  async run(mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('media', mode), r = fn(tx.objectStore('media'));
+      tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+    });
+  },
+  get: k => idb.run('readonly', s => s.get(k)),
+  set: (k, v) => idb.run('readwrite', s => s.put(v, k)),
+  del: k => idb.run('readwrite', s => s.delete(k))
+};
+let videoURL = '';   // URL del blob del video actual
+async function loadVideo() {
+  try {
+    const b = await idb.get('bgvideo');
+    if (b instanceof Blob) { videoURL = URL.createObjectURL(b); return true; }
+  } catch (e) { }
+  return false;
+}
+
+/* =========================================================
+   UTILIDADES DE DOM
+   ========================================================= */
+function h(tag, a, ...kids) {
+  const e = document.createElement(tag);
+  if (a) for (const k in a) {
+    const v = a[k]; if (v == null || v === false) continue;
+    if (k === 'class') e.className = v; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return e;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function icon(n) {
+  const s = document.createElementNS(NS, 'svg'); s.setAttribute('class', 'i'); s.setAttribute('aria-hidden', 'true');
+  const u = document.createElementNS(NS, 'use'); u.setAttribute('href', '#i-' + n); s.append(u); return s;
+}
+function toast(msg, opt) {
+  opt = opt || {};
+  const t = h('div', { class: 'toast' + (opt.error ? ' error' : '') }, h('span', null, msg));
+  if (opt.undo) t.append(h('button', { type: 'button', onclick: () => { opt.undo(); t.remove(); } }, 'Deshacer'));
+  const box = $('toasts'); box.append(t); while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => t.remove(), opt.undo ? 6500 : 3200);
+}
+async function toImage(file, maxW, maxH, cover, png) {
+  let bm;
+  try { bm = await createImageBitmap(file); }
+  catch (e) {
+    const url = URL.createObjectURL(file);
+    try { bm = await new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = url; }); }
+    finally { setTimeout(() => URL.revokeObjectURL(url), 3000); }
+  }
+  const sw = bm.width || bm.naturalWidth, sh = bm.height || bm.naturalHeight;
+  let w, hh;
+  const c = document.createElement('canvas'), g = c.getContext('2d');
+  if (cover) {
+    c.width = w = maxW; c.height = hh = maxH;
+    const k = Math.max(w / sw, hh / sh), dw = sw * k, dh = sh * k;
+    if (!png) { g.fillStyle = '#fff'; g.fillRect(0, 0, w, hh); }
+    g.drawImage(bm, (w - dw) / 2, (hh - dh) / 2, dw, dh);
+  } else {
+    const k = Math.min(1, maxW / sw, maxH / sh);
+    c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+    g.drawImage(bm, 0, 0, c.width, c.height);
+  }
+  if (bm.close) bm.close();
+  let out = png ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', .8);
+  if (png && out.length > 250000) out = c.toDataURL('image/jpeg', .85);   // PNG pesado: mejor JPEG
+  for (let q = .65; !imgOk(out) && q > .3; q -= .15) out = c.toDataURL('image/jpeg', q);
+  if (!imgOk(out)) throw new Error('img');
+  return out;
+}
+
+/* =========================================================
+   RENDER DEL MICRO-SITIO (compartido por vista previa y página pública)
+   ========================================================= */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const videoEls = {};   // un <video> por contenedor, para que no se reinicie al editar
+function getVideo(key) {
+  let v = videoEls[key];
+  if (!v || v.dataset.src !== videoURL) {
+    v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true'); v.tabIndex = -1;
+    if (reduceMotion) v.addEventListener('loadeddata', () => { try { v.currentTime = 0.1; } catch (e) { } }, { once: true });
+    v.src = videoURL; v.dataset.src = videoURL; videoEls[key] = v;
+  }
+  return v;
+}
+function render(root, s, key, isPreview) {
+  const old = root.querySelector('.lp-scroll'), top = old ? old.scrollTop : 0;
+  const bg = h('div', { class: 'lp-bg' });
+  let dark = false;
+  if (s.bgType === 'color') bg.style.background = s.color;
+  else if (s.bgType === 'gradient') bg.style.background = 'linear-gradient(' + s.angle + 'deg,' + s.g1 + ',' + s.g2 + ')';
+  else if (s.bgType === 'image' && s.bgImg) { bg.style.backgroundImage = 'url("' + s.bgImg + '")'; dark = true; }
+  else if (s.bgType === 'video' && s.hasVideo && videoURL) { bg.append(getVideo(key)); dark = true; }
+  else bg.style.background = 'linear-gradient(160deg,' + DEFAULTS.g1 + ',' + DEFAULTS.g2 + ')';
+  // el oscurecido solo aplica a imagen y video
+  if (dark && s.shade) bg.append(h('div', { class: 'lp-shade', style: 'background:rgba(0,0,0,' + (s.shade / 100) + ')' }));
+
+  const hasBan = !!s.banner;
+  const view = h('div', { class: 'lp-view ' + (hasBan ? 'has-banner' : 'no-banner') + (s.logoPos === 'left' ? ' logo-left' : '') });
+  if (hasBan) view.append(h('div', { class: 'lp-banner' },
+    h('img', { src: s.banner, alt: '', style: 'opacity:' + (s.banOp / 100) }),
+    h('i', { style: 'background:' + s.ovColor + ';opacity:' + (s.ovAmt / 100) })));
+  const name = s.title.trim();
+  const logoInner = () => s.logo ? h('img', { src: s.logo, alt: '' }) : (name[0] || 'L').toUpperCase();
+  const logo = h('div', { class: 'lp-logo' }, s.logo ? h('img', { src: s.logo, alt: name ? 'Logo de ' + name : 'Logo' }) : (name[0] || 'L').toUpperCase());
+  view.append(h('div', { class: 'lp-head' }, logo, h(isPreview ? 'h3' : 'h1', { class: 'lp-title' }, name || 'Mi Perfil')));
+  // redes sociales
+  const soc = SOC.map(d => ({ d, href: socHref(d, s.social[d.k]) })).filter(x => x.href);
+  if (soc.length) view.append(h('nav', { class: 'lp-soc', 'aria-label': 'Redes sociales' },
+    soc.map(x => h('a', { href: x.href, target: '_blank', rel: 'noopener noreferrer', 'aria-label': x.d.n, title: x.d.n }, icon(x.d.ic)))));
+  // enlaces
+  if (s.links.length) view.append(h('div', { class: 'lp-list' }, s.links.map(l => h('a', { class: 'lp-link', href: l.url, target: '_blank', rel: 'noopener noreferrer' },
+    h('b', null, l.text), l.desc ? h('span', null, l.desc) : null))));
+  // productos
+  if (s.products.length) view.append(h('section', { class: 'lp-prods', 'aria-label': 'Productos' },
+    h(isPreview ? 'h4' : 'h2', { class: 'lp-h' }, 'Productos'),
+    s.products.map(p => {
+      const kids = [
+        h('div', { class: 'lp-ph' }, p.img ? h('img', { src: p.img, alt: '', loading: 'lazy' }) : (p.name[0] || '?').toUpperCase()),
+        h('div', { class: 'lp-pi' }, h('b', null, p.name), h('span', { class: 'pr' }, p.price > 0 ? fmtPrice(p.price, s.cur) : 'Consultar precio'), p.desc ? h('span', { class: 'd' }, p.desc) : null)
+      ];
+      return p.url ? h('a', { class: 'lp-prod', href: p.url, target: '_blank', rel: 'noopener noreferrer' }, kids) : h('div', { class: 'lp-prod' }, kids);
+    })));
+  if (isPreview && !s.links.length && !s.products.length && !soc.length) view.append(h('div', { class: 'lp-list' }, h('p', { class: 'lp-empty' }, 'Tus botones y productos aparecerán acá.')));
+
+  // barra compacta: al bajar, el logo pasa a la izquierda
+  const mini = h('div', { class: 'lp-mini', 'aria-hidden': 'true' }, h('div', { class: 'lp-mini-in' }, h('div', { class: 'm' }, logoInner()), h('span', { class: 't' }, name || 'Mi Perfil')));
+  const sc = h('div', { class: 'lp-scroll' }, mini, view);
+  const page = h('div', { class: 'lp', 'data-theme': s.theme }, bg, sc);
+  const sync = () => { page.classList.toggle('scrolled', sc.scrollTop > logo.offsetTop + logo.offsetHeight - 8); };
+  sc.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+  root.replaceChildren(page);
+  sc.scrollTop = top; sync();
+
+  const v = bg.querySelector('video');
+  if (v) {
+    {
+      const b = h('button', { class: 'lp-vt', type: 'button', 'aria-label': vidPaused ? 'Reproducir video de fondo' : 'Pausar video de fondo', onclick: () => {
+        vidPaused = !vidPaused; if (vidPaused) v.pause(); else v.play().catch(() => { });
+        b.setAttribute('aria-label', vidPaused ? 'Reproducir video de fondo' : 'Pausar video de fondo'); b.replaceChildren(icon(vidPaused ? 'play' : 'pause'));
+      } }, icon(vidPaused ? 'play' : 'pause'));
+      page.append(b);
+    }
+    if (!vidPaused) v.play().catch(() => { }); else v.pause();
+  }
+}
+let vidPaused = reduceMotion;   // con "reducir movimiento" el video arranca pausado y se activa con un botón
+
+/* =========================================================
+   GUARDADO
+   ========================================================= */
+let saveT = 0;
+function persist() {
+  $('savedTxt').textContent = 'Guardando…';
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); $('savedTxt').textContent = 'Guardado'; }
+    catch (e) {
+      $('savedTxt').textContent = 'No se guarda';
+      if (storeOK && !persist.warned) { persist.warned = true; toast('No hay espacio para guardar. Probá con imágenes más livianas.', { error: true }); }
+    }
+  }, 300);
+}
+let raf = 0;
+function changed() {
+  if (!raf) raf = requestAnimationFrame(() => { raf = 0; render($('screen'), state, 'prev', true); });
+  persist();
+}
+
+/* =========================================================
+   CONTROLES: GENERAL Y BANNER
+   ========================================================= */
+function bindText(id, key) { $(id).addEventListener('input', e => { state[key] = e.target.value; changed(); }); }
+function bindRange(id, key, fmt) {
+  $(id).addEventListener('input', e => { state[key] = +e.target.value; $(id + 'Out').textContent = fmt(+e.target.value); changed(); });
+}
+bindText('title', 'title');
+['color', 'g1', 'g2'].forEach(id => bindText(id, id));
+bindText('ovColor', 'ovColor');
+bindRange('angle', 'angle', v => v + '°');
+bindRange('shade', 'shade', v => v + '%');
+bindRange('banOp', 'banOp', v => v + '%');
+bindRange('ovAmt', 'ovAmt', v => v + '%');
+
+document.querySelectorAll('input[name="bgType"]').forEach(r => r.addEventListener('change', () => { if (r.checked) { state.bgType = r.value; paintBgBoxes(); changed(); } }));
+document.querySelectorAll('input[name="logoPos"]').forEach(r => r.addEventListener('change', () => { if (r.checked) { state.logoPos = r.value; changed(); } }));
+document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { if (r.checked) { state.theme = r.value; changed(); } }));
+// tema del panel: se guarda aparte y por defecto es claro (como siempre)
+const UIKEY = 'linkapp.ui';
+function applyUi(v) { document.documentElement.dataset.ui = v; const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = v === 'dark' ? '#111E17' : '#15803D'; }
+let uiTheme = 'light'; try { uiTheme = localStorage.getItem(UIKEY) === 'dark' ? 'dark' : 'light'; } catch (e) { }
+applyUi(uiTheme);
+document.querySelectorAll('input[name="uiTheme"]').forEach(r => r.addEventListener('change', () => {
+  if (!r.checked) return; uiTheme = r.value; applyUi(uiTheme); try { localStorage.setItem(UIKEY, uiTheme); } catch (e) { }
+}));
+
+async function pickImage(input, w, hh, cover, png, apply, okMsg) {
+  const f = input.files && input.files[0]; input.value = '';
+  if (!f) return;
+  if (!/^image\//.test(f.type)) { toast('Ese archivo no es una imagen.', { error: true }); return; }
+  if (f.size > 25e6) { toast('La imagen pesa demasiado (máximo 25 MB).', { error: true }); return; }
+  try { apply(await toImage(f, w, hh, cover, png)); changed(); paintAll(); toast(okMsg); }
+  catch (e) { toast('No pudimos leer esa imagen. Probá con JPG o PNG.', { error: true }); }
+}
+$('logoFile').addEventListener('change', e => { const f = e.target.files[0]; pickImage(e.target, 320, 320, true, !!f && /png|webp|gif/.test(f.type), v => state.logo = v, 'Logo actualizado'); });
+$('banFile').addEventListener('change', e => pickImage(e.target, 1200, 400, true, false, v => state.banner = v, 'Banner actualizado'));
+$('bgImgFile').addEventListener('change', e => pickImage(e.target, 1280, 1280, false, false, v => { state.bgImg = v; state.bgType = 'image'; }, 'Imagen de fondo actualizada'));
+$('logoClear').addEventListener('click', () => { state.logo = ''; changed(); paintAll(); $('logoFile').focus(); });
+$('banClear').addEventListener('click', () => { state.banner = ''; changed(); paintAll(); $('banFile').focus(); });
+$('bgImgClear').addEventListener('click', () => { state.bgImg = ''; changed(); paintAll(); $('bgImgFile').focus(); });
+
+function probeVideo(file) {
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(file), v = document.createElement('video');
+    v.preload = 'auto'; v.muted = true;
+    const end = ok => { clearTimeout(t); URL.revokeObjectURL(u); ok ? res() : rej(new Error('codec')); };
+    const t = setTimeout(() => end(false), 10000);
+    v.onloadeddata = () => end(v.videoWidth > 0);
+    v.onerror = () => end(false);
+    v.src = u;
+  });
+}
+$('bgVidFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (!/^video\//.test(f.type) && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(f.name)) { toast('Ese archivo no es un video.', { error: true }); return; }
+  if (f.size > MAX_VIDEO) { toast('El video pesa más de 100 MB. Usá uno más corto o liviano.', { error: true }); return; }
+  $('bgVidHint').textContent = 'Revisando el video…';
+  try { await probeVideo(f); }
+  catch (err) { paintAll(); toast('Tu navegador no puede reproducir ese video. Probá con MP4 (H.264) o WebM.', { error: true }); return; }
+  // se muestra YA desde memoria; guardarlo para después es un extra que puede fallar
+  if (videoURL) URL.revokeObjectURL(videoURL);
+  videoURL = URL.createObjectURL(f);
+  Object.keys(videoEls).forEach(k => delete videoEls[k]);
+  state.hasVideo = true; state.bgType = 'video'; $('bgVidHint').dataset.name = f.name; vidPaused = reduceMotion;
+  changed(); paintAll(); toast('Video de fondo cargado');
+  try { await idb.set('bgvideo', f); }
+  catch (err) { toast('Se ve ahora, pero este navegador no puede guardarlo: al recargar habrá que subirlo de nuevo.'); }
+});
+$('bgVidClear').addEventListener('click', async () => {
+  try { await idb.del('bgvideo'); } catch (e) { }
+  if (videoURL) URL.revokeObjectURL(videoURL); videoURL = ''; state.hasVideo = false; Object.keys(videoEls).forEach(k => delete videoEls[k]);
+  changed(); paintAll(); $('bgVidFile').focus();
+});
+
+function paintBgBoxes() {
+  const t = state.bgType;
+  $('boxColor').hidden = t !== 'color'; $('boxGrad').hidden = t !== 'gradient';
+  $('boxImage').hidden = t !== 'image'; $('boxVideo').hidden = t !== 'video';
+  $('boxShade').hidden = !(t === 'image' || t === 'video');
+}
+
+/* =========================================================
+   CATÁLOGO DE LINKS Y PRODUCTOS
+   ========================================================= */
+function fieldErr(inp, errId, msg) { inp.setAttribute('aria-invalid', msg ? 'true' : 'false'); $(errId).textContent = msg || ''; }
+const BOX = { links: 'items', products: 'pItems' };
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const text = $('fText').value.trim(), raw = $('fUrl').value.trim(), url = normUrl(raw);
+  let bad = null;
+  if (!text) { fieldErr($('fText'), 'fTextErr', 'Escribí el texto del botón.'); bad = bad || $('fText'); } else fieldErr($('fText'), 'fTextErr', '');
+  if (!url) { fieldErr($('fUrl'), 'fUrlErr', raw ? 'Esa URL no parece válida. Ejemplo: https://mitienda.com' : 'Pegá la URL de destino.'); bad = bad || $('fUrl'); } else fieldErr($('fUrl'), 'fUrlErr', '');
+  if (bad) { bad.focus(); return; }
+  if (state.links.length >= MAX_LINKS) { toast('Llegaste al máximo de ' + MAX_LINKS + ' elementos.', { error: true }); return; }
+  state.links.push({ id: uid(), text, url, desc: $('fDesc').value.trim().slice(0, 100) });
+  e.target.reset(); paintLists(); changed();
+  const row = $('items').lastElementChild; if (row) { row.classList.add('flash'); row.scrollIntoView({ block: 'nearest' }); }
+  $('fText').focus(); toast('Elemento añadido');
+});
+['fText', 'fUrl'].forEach(id => $(id).addEventListener('input', e => { if (e.target.value.trim()) fieldErr(e.target, id + 'Err', ''); }));
+
+/* ----- productos ----- */
+let pImg = '';
+function paintPhoto() { $('pFileClear').hidden = !pImg; $('pFileHint').textContent = pImg ? 'Foto lista' : ''; }
+$('pFile').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (!/^image\//.test(f.type)) { toast('Ese archivo no es una imagen.', { error: true }); return; }
+  toImage(f, 400, 400, true, false).then(v => { pImg = v; paintPhoto(); }).catch(() => toast('No pudimos leer esa imagen. Probá con JPG o PNG.', { error: true }));
+});
+$('pFileClear').addEventListener('click', () => { pImg = ''; paintPhoto(); $('pFile').focus(); });
+$('cur').addEventListener('change', e => { state.cur = e.target.value; paintLists(); changed(); });
+$('pform').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('pName').value.trim(), rawPrice = $('pPrice').value.trim(), price = rawPrice ? parsePrice(rawPrice) : 0, rawUrl = $('pUrl').value.trim(), url = rawUrl ? normUrl(rawUrl) : '';
+  let bad = null;
+  if (!name) { fieldErr($('pName'), 'pNameErr', 'Escribí el nombre del producto.'); bad = bad || $('pName'); } else fieldErr($('pName'), 'pNameErr', '');
+  if (rawPrice && !(price > 0)) { fieldErr($('pPrice'), 'pPriceErr', 'Ingresá un precio válido, por ejemplo 12000, o dejalo vacío.'); bad = bad || $('pPrice'); } else fieldErr($('pPrice'), 'pPriceErr', '');
+  if (rawUrl && !url) { fieldErr($('pUrl'), 'pUrlErr', 'Ese link no parece válido. Ejemplo: https://...'); bad = bad || $('pUrl'); } else fieldErr($('pUrl'), 'pUrlErr', '');
+  if (bad) { bad.focus(); toast('Revisá los campos marcados en rojo.', { error: true }); return; }
+  if (state.products.length >= MAX_PRODUCTS) { toast('Llegaste al máximo de ' + MAX_PRODUCTS + ' productos.', { error: true }); return; }
+  state.products.push({ id: uid(), name: name.slice(0, 60), price: price > 0 ? price : 0, desc: $('pDesc').value.trim().slice(0, 90), img: pImg, url });
+  e.target.reset(); $('cur').value = state.cur; pImg = ''; paintPhoto(); paintLists(); changed();
+  const row = $('pItems').lastElementChild; if (row) { row.classList.add('flash'); row.scrollIntoView({ block: 'nearest' }); }
+  $('pName').focus(); toast('Producto añadido');
+});
+['pName', 'pPrice'].forEach(id => $(id).addEventListener('input', e => { if (e.target.value.trim()) fieldErr(e.target, id + 'Err', ''); }));
+
+/* ----- listas (reordenar, eliminar) ----- */
+function reorder(key, id, dir) {
+  const a = state[key], i = a.findIndex(x => x.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= a.length) return;
+  [a[i], a[j]] = [a[j], a[i]];
+  paintLists(key, id, dir); changed();
+}
+function removeItem(key, id) {
+  const a = state[key], i = a.findIndex(x => x.id === id); if (i < 0) return;
+  const it = a.splice(i, 1)[0];
+  paintLists(); changed();
+  const nx = $(BOX[key]).children[Math.min(i, a.length - 1)];
+  const f = nx ? nx.querySelector('button:not(:disabled)') : $(key === 'links' ? 'fText' : 'pName'); if (f) f.focus();
+  toast(key === 'links' ? 'Elemento eliminado' : 'Producto eliminado', { undo: () => { a.splice(i, 0, it); paintLists(); changed(); } });
+}
+function btns(key, it, i, n) {
+  return h('div', { class: 'pb' },
+    h('button', { type: 'button', class: 'ibtn', 'data-id': it.id, 'data-d': '-1', 'aria-label': 'Subir ' + (it.text || it.name), disabled: i === 0 ? true : null, onclick: () => reorder(key, it.id, -1) }, icon('up')),
+    h('button', { type: 'button', class: 'ibtn', 'data-id': it.id, 'data-d': '1', 'aria-label': 'Bajar ' + (it.text || it.name), disabled: i === n - 1 ? true : null, onclick: () => reorder(key, it.id, 1) }, icon('down')),
+    h('button', { type: 'button', class: 'ibtn del', 'aria-label': 'Eliminar ' + (it.text || it.name), onclick: () => removeItem(key, it.id) }, icon('trash')));
+}
+function paintLists(focusKey, focusId, dir) {
+  const nl = state.links.length, np = state.products.length;
+  $('items').replaceChildren(...state.links.map((l, i) => h('li', { class: 'item' },
+    h('div', { style: 'min-width:0' }, h('b', null, l.text), h('small', { class: 'url' }, l.url), l.desc ? h('small', null, l.desc) : null), btns('links', l, i, nl))));
+  $('itemsEmpty').hidden = nl > 0;
+  $('pItems').replaceChildren(...state.products.map((p, i) => h('li', { class: 'item p' },
+    h('div', { class: 'thumb' }, p.img ? h('img', { src: p.img, alt: '' }) : (p.name[0] || '?').toUpperCase()),
+    h('div', { style: 'min-width:0' }, h('b', null, p.name), h('small', { class: 'url' }, p.price > 0 ? fmtPrice(p.price, state.cur) : 'Consultar precio'), p.desc ? h('small', null, p.desc) : null),
+    btns('products', p, i, np))));
+  $('pEmpty').hidden = np > 0;
+  if (focusKey && focusId) {
+    const q = d => $(BOX[focusKey]).querySelector('button[data-id="' + focusId + '"][data-d="' + d + '"]:not(:disabled)');
+    const t = q(dir) || q(-dir); if (t) t.focus();
+  }
+}
+
+/* ----- redes sociales ----- */
+$('socGrid').replaceChildren(...SOC.map(d => {
+  const id = 'soc-' + d.k, err = h('p', { class: 'err', id: id + '-e' });
+  const inp = h('input', { class: 'inp', id, maxlength: '200', autocomplete: 'off', spellcheck: 'false', placeholder: d.ph, 'aria-describedby': id + '-e' });
+  const chk = () => fieldErr(inp, id + '-e', state.social[d.k].trim() && !socHref(d, state.social[d.k]) ? 'No entendemos ese usuario o link.' : '');
+  inp.addEventListener('input', () => { state.social[d.k] = inp.value.slice(0, 200); if (inp.getAttribute('aria-invalid') === 'true') chk(); changed(); });
+  inp.addEventListener('blur', chk);
+  return h('div', { class: 'field' }, h('label', { for: id, style: 'display:flex;align-items:center;gap:8px' }, icon(d.ic), d.n), inp, err);
+}));
+
+/* =========================================================
+   PINTAR FORMULARIO DESDE EL ESTADO
+   ========================================================= */
+function paintAll() {
+  $('title').value = state.title;
+  ['color', 'g1', 'g2', 'ovColor'].forEach(id => { $(id).value = state[id]; });
+  [['angle', '°'], ['shade', '%'], ['banOp', '%'], ['ovAmt', '%']].forEach(([id, u]) => { $(id).value = state[id]; $(id + 'Out').textContent = state[id] + u; });
+  document.querySelectorAll('input[name="bgType"]').forEach(r => { r.checked = r.value === state.bgType; });
+  $('logoClear').hidden = !state.logo; $('banClear').hidden = !state.banner;
+  $('bgImgClear').hidden = !state.bgImg; $('bgVidClear').hidden = !state.hasVideo;
+  $('bgImgHint').textContent = state.bgImg ? 'Imagen cargada.' : 'Todavía no subiste ninguna imagen.';
+  $('bgVidHint').textContent = state.hasVideo ? 'Video cargado' + ($('bgVidHint').dataset.name ? ': ' + $('bgVidHint').dataset.name : '') + '. Se reproduce sin sonido y en bucle.' : 'Todavía no subiste ningún video. Máximo 100 MB; se reproduce sin sonido y en bucle.';
+  const t = state.bgType;
+  $('boxColor').hidden = t !== 'color'; $('boxGrad').hidden = t !== 'gradient'; $('boxImage').hidden = t !== 'image'; $('boxVideo').hidden = t !== 'video';
+  $('boxShade').hidden = !(t === 'image' || t === 'video');
+  document.querySelectorAll('input[name="logoPos"]').forEach(r => { r.checked = r.value === state.logoPos; });
+  document.querySelectorAll('input[name="theme"]').forEach(r => { r.checked = r.value === state.theme; });
+  document.querySelectorAll('input[name="uiTheme"]').forEach(r => { r.checked = r.value === uiTheme; });
+  SOC.forEach(d => { $('soc-' + d.k).value = state.social[d.k] || ''; });
+  $('cur').value = state.cur; paintPhoto(); paintLists();
+}
+
+$('reset').addEventListener('click', async () => {
+  const snap = JSON.parse(JSON.stringify(state)), hadVideo = state.hasVideo;
+  if (hadVideo) { try { await idb.del('bgvideo'); } catch (e) { } if (videoURL) URL.revokeObjectURL(videoURL); videoURL = ''; }
+  state = clean(null); pImg = ''; paintAll(); changed();
+  toast('Restablecimos todo.', { undo: () => { state = clean(snap); if (hadVideo) { state.hasVideo = false; } paintAll(); changed(); } });
+});
+
+/* =========================================================
+   NAVEGACIÓN ENTRE LAS DOS PÁGINAS (SPA con hash)
+   ========================================================= */
+function route() {
+  const pub = location.hash === '#ver';
+  $('panel').hidden = pub; $('pub').hidden = !pub;
+  document.body.style.overflow = pub ? 'hidden' : '';
+  document.title = pub ? ((state.title.trim() || 'Mi Perfil')) : 'Link.App - Panel de Control';
+  if (pub) { render($('pubScreen'), state, 'pub', false); $('pubBack').focus(); }
+  else render($('screen'), state, 'prev', true);
+}
+window.addEventListener('hashchange', route);
+$('pubBack').addEventListener('click', e => { e.preventDefault(); history.pushState('', '', location.pathname + location.search); route(); $('viewBtn').focus(); });
+
+// pestañas del celular
+function setView(v) {
+  $('main').dataset.view = v;
+  $('vEdit').setAttribute('aria-pressed', String(v === 'edit')); $('vPrev').setAttribute('aria-pressed', String(v === 'preview'));
+  if (v === 'preview') render($('screen'), state, 'prev', true);
+}
+$('vEdit').addEventListener('click', () => setView('edit'));
+$('vPrev').addEventListener('click', () => setView('preview'));
+
+/* =========================================================
+   ARRANQUE
+   ========================================================= */
+if (!storeOK) $('storeWarn').hidden = false;
+paintAll();
+(async () => {
+  if (state.hasVideo) { const ok = await loadVideo(); if (!ok) { state.hasVideo = false; } }
+  route();
+})();
+window.addEventListener('pagehide', () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { } });
+})();
+</script>
+</body>
+</html>

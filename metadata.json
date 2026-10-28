@@ -1,0 +1,6 @@
+{
+  "name": "Link.App",
+  "description": "Panel de control y micro-sitio para catálogos interactivos con filtro por género y carrito de compras.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
